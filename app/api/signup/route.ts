@@ -51,5 +51,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to send confirmation email." }, { status: 500 });
   }
 
+  if (welcome.value.error) {
+    console.error("Resend error (welcome):", welcome.value.error);
+    return NextResponse.json({ error: welcome.value.error.message }, { status: 500 });
+  }
+
+  if (notify.status === "fulfilled" && notify.value.error) {
+    console.error("Resend error (notify):", notify.value.error);
+  }
+
+  console.log("Emails sent — welcome ID:", welcome.value.data?.id);
   return NextResponse.json({ ok: true });
 }
