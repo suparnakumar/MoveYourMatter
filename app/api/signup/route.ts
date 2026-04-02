@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM = "MoveYourMatter <hello@moveyourmatter.com>";
+const FROM = "MoveYourMatter <suparna@moveyourmatter.com>";
 const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL ?? "suparna@moveyourmatter.com";
 
 export async function POST(req: Request) {
