@@ -1,8 +1,9 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a1a1a;
 }
 
 @theme inline {
@@ -10,17 +11,29 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Brand green — replaces teal across the site */
+  --color-teal-50:  #f0fdf8;
+  --color-teal-100: #d1f7eb;
+  --color-teal-200: #a3ecd4;
+  --color-teal-300: #6dd9b5;
+  --color-teal-600: #1D9E75;
+  --color-teal-700: #0F6E56;
+  --color-teal-800: #0d5d49;
+  --color-teal-900: #0a4a3a;
+
+  /* Brand amber — replaces amber across the site */
+  --color-amber-50:  #fef9ee;
+  --color-amber-100: #faeeda;
+  --color-amber-300: #f3c06a;
+  --color-amber-400: #EF9F27;
+  --color-amber-600: #c47a0a;
+  --color-amber-700: #854F0B;
+  --color-amber-800: #6b3f09;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
