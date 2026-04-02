@@ -5,12 +5,30 @@ import { page, goals, socialProof, success } from "../content";
 
 export default function SignupForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", email: "", goal: "" });
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: wire up to backend / email provider
-    setSubmitted(true);
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Something went wrong. Please try again.");
+      }
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (submitted) {
@@ -76,10 +94,16 @@ export default function SignupForm() {
           </select>
         </div>
 
-        <button type="submit" className="w-full py-4 rounded-full bg-teal-700 text-white font-bold text-lg hover:bg-teal-800 transition-colors">
-          {page.submitLabel}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-4 rounded-full bg-teal-700 text-white font-bold text-lg hover:bg-teal-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? "Joining…" : page.submitLabel}
         </button>
       </form>
+
+      {error && <p className="text-center text-red-600 text-sm mt-4">{error}</p>}
 
       <p className="text-center text-stone-400 text-sm mt-6">{page.disclaimer}</p>
 
