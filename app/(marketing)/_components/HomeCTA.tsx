@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { cta } from "@/app/content";
+import { cta } from "@/app/(marketing)/content";
 
 export default function HomeCTA() {
   return (

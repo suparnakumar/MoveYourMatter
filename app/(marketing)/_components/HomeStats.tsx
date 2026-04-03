@@ -1,4 +1,4 @@
-import { stats } from "@/app/content";
+import { stats } from "@/app/(marketing)/content";
 
 export default function HomeStats() {
   return (

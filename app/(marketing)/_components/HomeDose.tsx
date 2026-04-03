@@ -1,4 +1,4 @@
-import { dose } from "@/app/content";
+import { dose } from "@/app/(marketing)/content";
 
 export default function HomeDose() {
   return (

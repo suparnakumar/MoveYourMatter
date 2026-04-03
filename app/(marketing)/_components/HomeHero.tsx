@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { hero } from "@/app/content";
+import { hero } from "@/app/(marketing)/content";
 
 export default function HomeHero() {
   return (

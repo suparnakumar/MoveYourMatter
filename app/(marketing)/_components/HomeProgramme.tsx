@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { programme } from "@/app/content";
+import { programme } from "@/app/(marketing)/content";
 
 export default function HomeProgramme() {
   return (

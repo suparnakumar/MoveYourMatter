@@ -1,4 +1,4 @@
-import { isNotIs, foundingTruth } from "@/app/content";
+import { isNotIs, foundingTruth } from "@/app/(marketing)/content";
 
 export default function HomeIsNotIs() {
   return (
