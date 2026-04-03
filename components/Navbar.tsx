@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const links = [
   { href: "/", label: "Home" },
@@ -13,6 +14,14 @@ const links = [
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setLoggedIn(!!user);
+    });
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-stone-50/90 backdrop-blur border-b border-stone-200">
@@ -34,18 +43,29 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
-          <Link
-            href="/signup"
-            className="text-sm font-medium text-stone-600 hover:text-teal-700 transition-colors"
-          >
-            Join waitlist
-          </Link>
-          <Link
-            href="/onboarding"
-            className="ml-2 px-4 py-2 rounded-full bg-teal-700 text-white text-sm font-medium hover:bg-teal-800 transition-colors"
-          >
-            Try it free
-          </Link>
+          {loggedIn ? (
+            <Link
+              href="/home"
+              className="ml-2 px-4 py-2 rounded-full bg-teal-700 text-white text-sm font-medium hover:bg-teal-800 transition-colors"
+            >
+              Go to practice
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/signup"
+                className="text-sm font-medium text-stone-600 hover:text-teal-700 transition-colors"
+              >
+                Join waitlist
+              </Link>
+              <Link
+                href="/onboarding"
+                className="ml-2 px-4 py-2 rounded-full bg-teal-700 text-white text-sm font-medium hover:bg-teal-800 transition-colors"
+              >
+                Try it free
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -77,20 +97,32 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
-          <Link
-            href="/signup"
-            onClick={() => setOpen(false)}
-            className="text-sm font-medium text-stone-600"
-          >
-            Join waitlist
-          </Link>
-          <Link
-            href="/onboarding"
-            onClick={() => setOpen(false)}
-            className="px-4 py-2 rounded-full bg-teal-700 text-white text-sm font-medium text-center"
-          >
-            Try it free
-          </Link>
+          {loggedIn ? (
+            <Link
+              href="/home"
+              onClick={() => setOpen(false)}
+              className="px-4 py-2 rounded-full bg-teal-700 text-white text-sm font-medium text-center"
+            >
+              Go to practice
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/signup"
+                onClick={() => setOpen(false)}
+                className="text-sm font-medium text-stone-600"
+              >
+                Join waitlist
+              </Link>
+              <Link
+                href="/onboarding"
+                onClick={() => setOpen(false)}
+                className="px-4 py-2 rounded-full bg-teal-700 text-white text-sm font-medium text-center"
+              >
+                Try it free
+              </Link>
+            </>
+          )}
         </div>
       )}
     </nav>

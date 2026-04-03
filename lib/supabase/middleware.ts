@@ -50,8 +50,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect logged-in users away from login page
-  if (user && pathname === "/auth/login") {
+  // Redirect logged-in users away from login and onboarding
+  const isAuthOnlyForGuests = pathname === "/auth/login" || pathname.startsWith("/onboarding");
+  if (user && isAuthOnlyForGuests) {
     const homeUrl = request.nextUrl.clone();
     homeUrl.pathname = "/home";
     return NextResponse.redirect(homeUrl);
