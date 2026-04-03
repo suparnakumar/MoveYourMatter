@@ -1,13 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { currentRasaWeek } from "@/lib/bss";
 import Link from "next/link";
-
-function timeGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-}
+import Greeting from "./Greeting";
 
 function streakMessage(streak: number) {
   if (streak === 0) return "Start your first session to begin your streak";
@@ -49,10 +43,7 @@ export default async function HomePage() {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <div>
-          <p className="text-stone-400 text-sm">{timeGreeting()},</p>
-          <h1 className="text-2xl md:text-3xl font-semibold text-stone-900 capitalize">{displayName}</h1>
-        </div>
+        <Greeting name={displayName} />
         <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-semibold">
           {displayName[0]?.toUpperCase()}
         </div>
