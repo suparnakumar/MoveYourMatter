@@ -9,11 +9,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!user) redirect("/auth/login");
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col max-w-md mx-auto">
-      <div className="flex-1 flex flex-col overflow-y-auto">
+    <div className="min-h-screen bg-stone-50 flex flex-col">
+      {/* Top nav — desktop only */}
+      <div className="hidden md:block">
+        <AppNav variant="top" />
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col pb-16 md:pb-0">
         {children}
       </div>
-      <AppNav />
+
+      {/* Bottom nav — mobile only */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+        <AppNav variant="bottom" />
+      </div>
     </div>
   );
 }

@@ -47,10 +47,14 @@ export default async function PracticePage() {
   }
 
   return (
-    <PracticePlayer
-      userId={user!.id}
-      rasa={rasa ?? { slug: "veera", name: "Veera", theme: "Focus, courage", colour: "#0F6E56" }}
-      currentStreak={streak?.current_streak ?? 0}
-    />
+    <div className="flex-1 flex flex-col md:items-center md:justify-center md:py-10">
+      <div className="w-full md:max-w-lg md:rounded-3xl md:overflow-hidden md:shadow-xl flex flex-col flex-1 md:flex-none md:min-h-[700px]">
+        <PracticePlayer
+          userId={user!.id}
+          rasa={rasa ?? { slug: "veera", name: "Veera", theme: "Focus, courage", colour: "#0F6E56" }}
+          currentStreak={streak?.current_streak ?? 0}
+        />
+      </div>
+    </div>
   );
 }

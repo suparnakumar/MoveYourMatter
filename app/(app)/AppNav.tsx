@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function AppNav() {
+export default function AppNav({ variant = "bottom" }: { variant?: "top" | "bottom" }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -12,6 +12,30 @@ export default function AppNav() {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/");
+  }
+
+  if (variant === "top") {
+    return (
+      <nav className="border-b border-stone-200 bg-white px-8 h-14 flex items-center justify-between">
+        <Link href="/home" className="font-bold text-lg tracking-tight text-teal-700">
+          MoveYourMatter
+        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/home" className={`text-sm font-medium transition-colors hover:text-teal-700 ${pathname === "/home" ? "text-teal-700" : "text-stone-500"}`}>
+            Home
+          </Link>
+          <Link href="/practice" className={`text-sm font-medium transition-colors hover:text-teal-700 ${pathname === "/practice" ? "text-teal-700" : "text-stone-500"}`}>
+            Practice
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="text-sm font-medium text-stone-400 hover:text-rose-500 transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
+      </nav>
+    );
   }
 
   return (
