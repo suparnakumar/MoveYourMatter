@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import AppNav from "./AppNav";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -9,7 +10,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col max-w-md mx-auto">
-      {children}
+      <div className="flex-1 flex flex-col overflow-y-auto">
+        {children}
+      </div>
+      <AppNav />
     </div>
   );
 }
