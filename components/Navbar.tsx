@@ -53,10 +53,10 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="/signup"
+                href="/auth/login"
                 className="text-sm font-medium text-stone-600 hover:text-teal-700 transition-colors"
               >
-                Join waitlist
+                Sign in
               </Link>
               <Link
                 href="/onboarding"
@@ -108,11 +108,11 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="/signup"
+                href="/auth/login"
                 onClick={() => setOpen(false)}
                 className="text-sm font-medium text-stone-600"
               >
-                Join waitlist
+                Sign in
               </Link>
               <Link
                 href="/onboarding"
