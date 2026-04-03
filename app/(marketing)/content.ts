@@ -3,8 +3,8 @@ export const hero = {
   heading: "Your brain deserves a daily workout.",
   subheading:
     "No dance experience needed. No coordination required. Just 7 minutes of intentional movement — and your brain gets the workout your body has been getting at the gym.",
-  primaryCta: { label: "Start the Practice", href: "/signup" },
-  secondaryCta: { label: "How it works", href: "/programs" },
+  primaryCta: { label: "Start your first practice", href: "/onboarding" },
+  secondaryCta: { label: "Join the waitlist", href: "/signup" },
 };
 
 export const isNotIs = {
