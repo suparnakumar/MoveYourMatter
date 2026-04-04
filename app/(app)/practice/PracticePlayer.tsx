@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { calculateBSS, bssLanguage, type CheckIn } from "@/lib/bss";
+import VideoPlayer from "./VideoPlayer";
 
 type Phase = "pre" | "session" | "post" | "result";
 
@@ -12,6 +13,12 @@ type Rasa = {
   name: string;
   theme: string;
   colour: string;
+};
+
+type Video = {
+  url: string;
+  title: string;
+  duration_seconds: number;
 };
 
 const SESSION_PHASES = [
@@ -48,10 +55,17 @@ function Slider({ label, description, value, onChange }: {
 }
 
 export default function PracticePlayer({
-  userId, rasa, currentStreak,
+  userId, rasa, currentStreak, sessionPlanId, videos,
 }: {
-  userId: string; rasa: Rasa; currentStreak: number;
+  userId: string;
+  rasa: Rasa;
+  currentStreak: number;
+  sessionPlanId: string | null;
+  videos: Video[];
 }) {
+  const hasVideo = videos.length > 0;
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const currentVideo = videos[currentVideoIndex] ?? null;
   const router = useRouter();
   const supabase = createClient();
 
@@ -198,6 +212,74 @@ export default function PracticePlayer({
   // ── SESSION ───────────────────────────────────────────────
   if (phase === "session") {
     const currentP = SESSION_PHASES[currentPhaseIndex];
+
+    // ── VIDEO MODE ──
+    if (hasVideo && currentVideo) {
+      return (
+        <div className="flex-1 flex flex-col bg-stone-900 text-white">
+          <div className="h-1 bg-stone-700">
+            <div className="h-1 bg-teal-500 transition-all duration-300"
+              style={{ width: `${((currentVideoIndex) / videos.length) * 100}%` }} />
+          </div>
+
+          {!sessionStarted ? (
+            <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-8 border-2 border-teal-500"
+                style={{ backgroundColor: rasa.colour + "33" }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+              <p className="text-xs uppercase tracking-widest text-stone-400 mb-2">{rasa.name} · {rasa.theme}</p>
+              <h1 className="text-2xl font-semibold mb-2">{currentVideo.title}</h1>
+              <p className="text-stone-400 text-sm max-w-xs">Follow along. Don't think about doing it right — just move.</p>
+              <button onClick={() => setSessionStarted(true)}
+                className="mt-10 w-full max-w-xs py-4 rounded-2xl bg-teal-600 text-white font-semibold text-lg hover:bg-teal-500 transition-colors">
+                Begin session
+              </button>
+            </div>
+          ) : sessionDone ? (
+            <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+              <div className="text-6xl mb-4">🌟</div>
+              <h1 className="text-2xl font-semibold mb-2">Session complete</h1>
+              <p className="text-stone-400 mb-10">Let's see what shifted.</p>
+              <button onClick={() => setPhase("post")}
+                className="w-full max-w-xs py-4 rounded-2xl bg-teal-600 text-white font-semibold text-lg hover:bg-teal-500 transition-colors">
+                Post check-in
+              </button>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col">
+              <VideoPlayer
+                url={currentVideo.url}
+                title={`${rasa.name} · ${currentVideo.title}`}
+                onProgress={(s) => setSecondsElapsed(s)}
+                onEnded={() => {
+                  if (currentVideoIndex < videos.length - 1) {
+                    setCurrentVideoIndex((i) => i + 1);
+                  } else {
+                    setSessionDone(true);
+                  }
+                }}
+              />
+              {videos.length > 1 && (
+                <div className="px-4 py-3 flex items-center gap-2">
+                  {videos.map((_, i) => (
+                    <div key={i} className={`h-1 flex-1 rounded-full ${i <= currentVideoIndex ? "bg-teal-500" : "bg-stone-700"}`} />
+                  ))}
+                </div>
+              )}
+              <div className="px-6 pb-6 mt-auto">
+                <button onClick={skipToEnd}
+                  className="w-full py-3 rounded-2xl border border-stone-700 text-stone-400 text-sm hover:border-stone-600 transition-colors">
+                  End session early
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ── TIMER / PLACEHOLDER MODE (no video yet) ──
     return (
       <div className="flex-1 flex flex-col bg-stone-900 text-white">
         {/* Progress bar */}
@@ -224,14 +306,11 @@ export default function PracticePlayer({
             </>
           ) : (
             <>
-              {/* Timer */}
               <div className="text-6xl font-bold tabular-nums mb-2">
                 {mins}:{secs.toString().padStart(2, "0")}
               </div>
-              {/* Phase indicator */}
               <p className="text-teal-400 text-sm font-medium mb-1">{currentP.name}</p>
               <p className="text-stone-400 text-sm max-w-xs">{currentP.instruction}</p>
-              {/* Phase dots */}
               <div className="flex gap-1.5 mt-6">
                 {SESSION_PHASES.map((_, i) => (
                   <div key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i <= currentPhaseIndex ? "bg-teal-500" : "bg-stone-700"}`} />
