@@ -73,6 +73,10 @@ export default function SaveScore() {
         <p className="text-stone-400 text-xs mt-6 max-w-xs">
           No spam. Your data is yours. You can delete your account at any time.
         </p>
+
+        <a href="/" className="mt-8 text-stone-400 text-sm hover:text-stone-600 transition-colors">
+          Not now — take me back to the site
+        </a>
       </div>
     </div>
   );
