@@ -28,7 +28,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-stone-50/90 backdrop-blur border-b border-stone-200">
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
         <Link href="/" className="flex items-center">
-          <Image src="/logo.jpg" alt="MoveYourMatter" width={140} height={48} className="h-10 w-auto object-contain" priority />
+          <Image src="/logo.png" alt="MoveYourMatter" width={140} height={48} className="h-10 w-auto object-contain" priority />
         </Link>
 
         {/* Desktop */}
