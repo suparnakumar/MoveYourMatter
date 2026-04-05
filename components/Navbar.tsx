@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -26,8 +27,8 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-stone-50/90 backdrop-blur border-b border-stone-200">
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
-        <Link href="/" className="font-bold text-xl tracking-tight text-teal-700">
-          MoveYourMatter
+        <Link href="/" className="flex items-center">
+          <Image src="/logo.jpg" alt="MoveYourMatter" width={140} height={48} className="h-10 w-auto object-contain" priority />
         </Link>
 
         {/* Desktop */}

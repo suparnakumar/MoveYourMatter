@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -17,8 +18,8 @@ export default function AppNav({ variant = "bottom" }: { variant?: "top" | "bott
   if (variant === "top") {
     return (
       <nav className="border-b border-stone-200 bg-white px-8 h-14 flex items-center justify-between">
-        <Link href="/home" className="font-bold text-lg tracking-tight text-teal-700">
-          MoveYourMatter
+        <Link href="/home" className="flex items-center">
+          <Image src="/logo.jpg" alt="MoveYourMatter" width={120} height={40} className="h-8 w-auto object-contain" priority />
         </Link>
         <div className="flex items-center gap-6">
           <Link href="/home" className={`text-sm font-medium transition-colors hover:text-teal-700 ${pathname === "/home" ? "text-teal-700" : "text-stone-500"}`}>
