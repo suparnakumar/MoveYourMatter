@@ -31,7 +31,7 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protected app routes (require auth)
-  const isAppRoute = pathname.startsWith("/home") || pathname.startsWith("/practice");
+  const isAppRoute = pathname.startsWith("/home") || pathname.startsWith("/practice") || pathname.startsWith("/admin");
 
   if (isAppRoute && !user) {
     const loginUrl = request.nextUrl.clone();
