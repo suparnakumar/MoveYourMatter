@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { getPreCheckin, getPostCheckin, getBss, clearOnboardingData } from "@/lib/session-store";
 
 const times = [
   { value: "morning", label: "Morning", sub: "6am – 9am", emoji: "🌅" },
@@ -31,13 +32,11 @@ export default function SchedulePage() {
       });
 
       // Save the pre/post checkin and BSS to the database
-      const preRaw = sessionStorage.getItem("mym_pre_checkin");
-      const postRaw = sessionStorage.getItem("mym_post_checkin");
-      const bss = sessionStorage.getItem("mym_bss");
+      const pre = getPreCheckin();
+      const post = getPostCheckin();
+      const bss = getBss();
 
-      if (preRaw && postRaw && bss) {
-        const pre = JSON.parse(preRaw);
-        const post = JSON.parse(postRaw);
+      if (pre && post && bss !== null) {
         await supabase.from("practice_sessions").insert({
           user_id: user.id,
           session_date: new Date().toISOString().split("T")[0],
@@ -47,7 +46,7 @@ export default function SchedulePage() {
           post_focus: post.focus,
           post_energy: post.energy,
           post_calm: post.calm,
-          brain_shift_score: Number(bss),
+          brain_shift_score: bss,
           completed: true,
         });
 
@@ -60,6 +59,7 @@ export default function SchedulePage() {
       }
     }
 
+    clearOnboardingData();
     router.push("/home");
   }
 

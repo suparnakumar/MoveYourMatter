@@ -1,80 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import CheckinSlider from "@/components/CheckinSlider";
+import { calculateBSS, bssLanguage } from "@/lib/bss";
+import { getPreCheckin, setPostCheckin, setBss } from "@/lib/session-store";
 
 const dimensions = [
-  { key: "focus", label: "Focus", weight: 0.40, description: "How sharp is your attention now?" },
-  { key: "energy", label: "Energy", weight: 0.35, description: "How mentally energised do you feel?" },
-  { key: "calm", label: "Calm", weight: 0.25, description: "How calm and grounded do you feel?" },
+  { key: "focus", label: "Focus", description: "How sharp is your attention now?" },
+  { key: "energy", label: "Energy", description: "How mentally energised do you feel?" },
+  { key: "calm", label: "Calm", description: "How calm and grounded do you feel?" },
 ];
-
-function calculateBSS(pre: Record<string, number>, post: Record<string, number>) {
-  const weightedDelta = dimensions.reduce((sum, d) => {
-    const delta = post[d.key] - pre[d.key]; // -4 to +4
-    return sum + delta * d.weight;
-  }, 0);
-  // Map weighted delta (-4 to +4) to 0–100, with 50 = no change
-  return Math.round(50 + (weightedDelta / 4) * 50);
-}
-
-function bssLanguage(score: number) {
-  if (score >= 75) return { label: "Strong shift", message: "Your mind is firing. This was a high-impact session." };
-  if (score >= 60) return { label: "Good shift", message: "Solid session. You moved the needle today." };
-  if (score >= 50) return { label: "Mild shift", message: "Small shift — consistency is doing the work." };
-  if (score >= 35) return { label: "Flat day", message: "Hard day — showing up anyway is what builds the habit." };
-  return { label: "Rough session", message: "Even this session is data. Your brain noticed." };
-}
-
-function Slider({ label, description, value, onChange }: {
-  label: string;
-  description: string;
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div className="mb-6">
-      <div className="flex justify-between items-baseline mb-1">
-        <span className="font-medium text-stone-800">{label}</span>
-        <span className="text-xl font-bold text-teal-700">{value}</span>
-      </div>
-      <p className="text-stone-400 text-sm mb-2">{description}</p>
-      <input
-        type="range"
-        min={1}
-        max={5}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-teal-700 h-2 cursor-pointer"
-      />
-      <div className="flex justify-between text-xs text-stone-400 mt-1">
-        <span>Low</span>
-        <span>High</span>
-      </div>
-    </div>
-  );
-}
 
 export default function ScorePage() {
   const router = useRouter();
   const [phase, setPhase] = useState<"checkin" | "result">("checkin");
   const [post, setPost] = useState({ focus: 3, energy: 3, calm: 3 });
-  const [bss, setBss] = useState<number | null>(null);
+  const [bss, setScore] = useState<number | null>(null);
   const [deltas, setDeltas] = useState<Record<string, number>>({});
 
   function handleCalculate() {
-    const preRaw = sessionStorage.getItem("mym_pre_checkin");
-    const pre = preRaw ? JSON.parse(preRaw) : { focus: 3, energy: 3, calm: 3 };
+    const pre = getPreCheckin() ?? { focus: 3, energy: 3, calm: 3 };
     const score = calculateBSS(pre, post);
     const d: Record<string, number> = {};
     dimensions.forEach((dim) => {
       const k = dim.key as keyof typeof post;
       d[dim.key] = post[k] - pre[k];
     });
-    // Save for after sign-up
-    sessionStorage.setItem("mym_post_checkin", JSON.stringify(post));
-    sessionStorage.setItem("mym_bss", String(score));
+    setPostCheckin(post);
     setBss(score);
+    setScore(score);
     setDeltas(d);
     setPhase("result");
   }
@@ -92,7 +47,7 @@ export default function ScorePage() {
           <h1 className="text-2xl font-semibold text-stone-900 mb-2">How do you feel now?</h1>
           <p className="text-stone-500 text-sm mb-10">Same check-in as before. Let's see what shifted.</p>
           {dimensions.map((d) => (
-            <Slider
+            <CheckinSlider
               key={d.key}
               label={d.label}
               description={d.description}

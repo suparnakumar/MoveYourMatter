@@ -1,5 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  PROTECTED_ROUTES,
+  POST_AUTH_ONBOARDING_ROUTES,
+  GUEST_ONLY_ROUTES,
+} from "@/lib/route-config";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -30,29 +35,28 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Protected app routes (require auth)
-  const isAppRoute = pathname.startsWith("/home") || pathname.startsWith("/practice") || pathname.startsWith("/admin");
-
-  if (isAppRoute && !user) {
+  const isProtected = PROTECTED_ROUTES.some((r) => pathname.startsWith(r));
+  if (isProtected && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/auth/login";
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Onboarding/goal/schedule require auth (after Google sign-in at /onboarding/save)
-  const isPostAuthOnboarding =
-    pathname.startsWith("/onboarding/goal") || pathname.startsWith("/onboarding/schedule");
-
+  const isPostAuthOnboarding = POST_AUTH_ONBOARDING_ROUTES.some((r) =>
+    pathname.startsWith(r)
+  );
   if (isPostAuthOnboarding && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/auth/login";
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect logged-in users away from login and onboarding
-  const isAuthOnlyForGuests = pathname === "/auth/login" || pathname.startsWith("/onboarding");
-  if (user && isAuthOnlyForGuests) {
+  // Redirect signed-in users away from guest-only routes
+  const isGuestOnly =
+    GUEST_ONLY_ROUTES.some((r) => pathname.startsWith(r)) ||
+    pathname === "/auth/login";
+  if (user && isGuestOnly) {
     const homeUrl = request.nextUrl.clone();
     homeUrl.pathname = "/home";
     return NextResponse.redirect(homeUrl);

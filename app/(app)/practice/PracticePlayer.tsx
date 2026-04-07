@@ -1,58 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { calculateBSS, bssLanguage, type CheckIn } from "@/lib/bss";
+import type { Rasa, Video } from "@/lib/types";
+import CheckinSlider from "@/components/CheckinSlider";
+import { usePracticeSession, SESSION_PHASES } from "@/hooks/usePracticeSession";
 import VideoPlayer from "./VideoPlayer";
 
 type Phase = "pre" | "session" | "post" | "result";
-
-type Rasa = {
-  slug: string;
-  name: string;
-  theme: string;
-  colour: string;
-};
-
-type Video = {
-  url: string;
-  title: string;
-  duration_seconds: number;
-};
-
-const SESSION_PHASES = [
-  { name: "Opening Namaskar", duration: 30, instruction: "Place your hands together. Feel your feet on the ground." },
-  { name: "Tabla arrival", duration: 60, instruction: "Listen only. Let the beat settle into your body." },
-  { name: "Hand tapping", duration: 60, instruction: "Tap your hands to the rhythm. Two channels, one beat." },
-  { name: "Tatkar footwork", duration: 75, instruction: "Step with the beat. Steady, grounded, present." },
-  { name: "Doubles", duration: 60, instruction: "The beat doubles. Let your body adapt." },
-  { name: "Quadruples", duration: 45, instruction: "Peak intensity. Stay with it." },
-  { name: "Descent", duration: 45, instruction: "Slow down. Feel the deceleration." },
-  { name: "Closing Namaskar", duration: 45, instruction: "Same gesture as the opening. The practice is complete." },
-];
-const TOTAL_SECONDS = SESSION_PHASES.reduce((s, p) => s + p.duration, 0); // 420s = 7min
-
-function Slider({ label, description, value, onChange }: {
-  label: string; description: string; value: number; onChange: (v: number) => void;
-}) {
-  return (
-    <div className="mb-7">
-      <div className="flex justify-between items-baseline mb-1">
-        <span className="font-medium text-stone-800">{label}</span>
-        <span className="text-2xl font-bold text-teal-700">{value}</span>
-      </div>
-      <p className="text-stone-400 text-sm mb-3">{description}</p>
-      <input type="range" min={1} max={5} value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-teal-700 h-2 cursor-pointer"
-      />
-      <div className="flex justify-between text-xs text-stone-400 mt-1">
-        <span>Low</span><span>High</span>
-      </div>
-    </div>
-  );
-}
 
 export default function PracticePlayer({
   userId, rasa, currentStreak, sessionPlanId, videos,
@@ -67,57 +23,26 @@ export default function PracticePlayer({
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const currentVideo = videos[currentVideoIndex] ?? null;
   const router = useRouter();
-  const supabase = createClient();
 
   const [phase, setPhase] = useState<Phase>("pre");
   const [pre, setPre] = useState<CheckIn>({ focus: 3, energy: 3, calm: 3 });
   const [post, setPost] = useState<CheckIn>({ focus: 3, energy: 3, calm: 3 });
   const [bss, setBss] = useState(0);
   const [deltas, setDeltas] = useState<CheckIn>({ focus: 0, energy: 0, calm: 0 });
-  const [saving, setSaving] = useState(false);
 
-  // Session timer state
-  const [secondsElapsed, setSecondsElapsed] = useState(0);
-  const [sessionStarted, setSessionStarted] = useState(false);
-  const [sessionDone, setSessionDone] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Derive current phase index from elapsed time
-  const currentPhaseIndex = (() => {
-    let acc = 0;
-    for (let i = 0; i < SESSION_PHASES.length; i++) {
-      acc += SESSION_PHASES[i].duration;
-      if (secondsElapsed < acc) return i;
-    }
-    return SESSION_PHASES.length - 1;
-  })();
-
-  const progress = Math.min(secondsElapsed / TOTAL_SECONDS, 1);
-  const secondsLeft = Math.max(TOTAL_SECONDS - secondsElapsed, 0);
-  const mins = Math.floor(secondsLeft / 60);
-  const secs = secondsLeft % 60;
-
-  function startSession() {
-    setSessionStarted(true);
-    timerRef.current = setInterval(() => {
-      setSecondsElapsed((s) => {
-        if (s + 1 >= TOTAL_SECONDS) {
-          clearInterval(timerRef.current!);
-          setSessionDone(true);
-          return TOTAL_SECONDS;
-        }
-        return s + 1;
-      });
-    }, 1000);
-  }
-
-  function skipToEnd() {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setSecondsElapsed(TOTAL_SECONDS);
-    setSessionDone(true);
-  }
-
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+  const {
+    secondsElapsed,
+    sessionStarted,
+    sessionDone,
+    saving,
+    currentPhaseIndex,
+    progress,
+    mins,
+    secs,
+    startSession,
+    skipToEnd,
+    save,
+  } = usePracticeSession({ userId, rasa });
 
   function handlePostSubmit() {
     const score = calculateBSS(pre, post);
@@ -132,55 +57,7 @@ export default function PracticePlayer({
   }
 
   async function handleSave() {
-    setSaving(true);
-    const today = new Date().toISOString().split("T")[0];
-
-    // Insert new session (multiple sessions per day allowed)
-    await supabase.from("practice_sessions").insert({
-      user_id: userId,
-      session_date: today,
-      rasa_slug: rasa.slug,
-      pre_focus: pre.focus,
-      pre_energy: pre.energy,
-      pre_calm: pre.calm,
-      post_focus: post.focus,
-      post_energy: post.energy,
-      post_calm: post.calm,
-      delta_focus: deltas.focus,
-      delta_energy: deltas.energy,
-      delta_calm: deltas.calm,
-      brain_shift_score: bss,
-      duration_seconds: secondsElapsed,
-      completed: true,
-    });
-
-    // Update streak — only increment once per day
-    const { data: existing } = await supabase
-      .from("streaks")
-      .select("current_streak, longest_streak, last_practice_date")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    const alreadyPracticedToday = existing?.last_practice_date === today;
-
-    if (!alreadyPracticedToday) {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-      const isConsecutive = existing?.last_practice_date === yesterdayStr;
-      const newStreak = isConsecutive ? (existing?.current_streak ?? 0) + 1 : 1;
-      const newLongest = Math.max(newStreak, existing?.longest_streak ?? 0);
-
-      await supabase.from("streaks").upsert({
-        user_id: userId,
-        current_streak: newStreak,
-        longest_streak: newLongest,
-        last_practice_date: today,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "user_id" });
-    }
-
+    await save({ pre, post, bss, deltas, sessionPlanId });
     router.push("/home");
   }
 
@@ -199,9 +76,9 @@ export default function PracticePlayer({
           <p className="text-stone-400 text-sm mb-1">Before we begin</p>
           <h1 className="text-2xl font-semibold text-stone-900 mb-2">Notice how you feel</h1>
           <p className="text-stone-500 text-sm mb-8">No right answers — just a snapshot.</p>
-          <Slider label="Focus" description="How sharp is your attention right now?" value={pre.focus} onChange={(v) => setPre((s) => ({ ...s, focus: v }))} />
-          <Slider label="Energy" description="How mentally energised do you feel?" value={pre.energy} onChange={(v) => setPre((s) => ({ ...s, energy: v }))} />
-          <Slider label="Calm" description="How settled and grounded do you feel?" value={pre.calm} onChange={(v) => setPre((s) => ({ ...s, calm: v }))} />
+          <CheckinSlider label="Focus" description="How sharp is your attention right now?" value={pre.focus} onChange={(v) => setPre((s) => ({ ...s, focus: v }))} />
+          <CheckinSlider label="Energy" description="How mentally energised do you feel?" value={pre.energy} onChange={(v) => setPre((s) => ({ ...s, energy: v }))} />
+          <CheckinSlider label="Calm" description="How settled and grounded do you feel?" value={pre.calm} onChange={(v) => setPre((s) => ({ ...s, calm: v }))} />
         </div>
         <div className="px-6 pb-10">
           <button onClick={() => setPhase("session")}
@@ -235,7 +112,7 @@ export default function PracticePlayer({
               <p className="text-xs uppercase tracking-widest text-stone-400 mb-2">{rasa.name} · {rasa.theme}</p>
               <h1 className="text-2xl font-semibold mb-2">{currentVideo.title}</h1>
               <p className="text-stone-400 text-sm max-w-xs">Follow along. Don't think about doing it right — just move.</p>
-              <button onClick={() => setSessionStarted(true)}
+              <button onClick={startSession}
                 className="mt-10 w-full max-w-xs py-4 rounded-2xl bg-teal-600 text-white font-semibold text-lg hover:bg-teal-500 transition-colors">
                 Begin session
               </button>
@@ -255,12 +132,11 @@ export default function PracticePlayer({
               <VideoPlayer
                 url={currentVideo.url}
                 title={`${rasa.name} · ${currentVideo.title}`}
-                onProgress={(s) => setSecondsElapsed(s)}
                 onEnded={() => {
                   if (currentVideoIndex < videos.length - 1) {
                     setCurrentVideoIndex((i) => i + 1);
                   } else {
-                    setSessionDone(true);
+                    skipToEnd();
                   }
                 }}
               />
@@ -355,9 +231,9 @@ export default function PracticePlayer({
           <p className="text-stone-400 text-sm mb-1">After the session</p>
           <h1 className="text-2xl font-semibold text-stone-900 mb-2">How do you feel now?</h1>
           <p className="text-stone-500 text-sm mb-8">Same check-in. Let's see what shifted.</p>
-          <Slider label="Focus" description="How sharp is your attention now?" value={post.focus} onChange={(v) => setPost((s) => ({ ...s, focus: v }))} />
-          <Slider label="Energy" description="How mentally energised do you feel?" value={post.energy} onChange={(v) => setPost((s) => ({ ...s, energy: v }))} />
-          <Slider label="Calm" description="How settled and grounded do you feel?" value={post.calm} onChange={(v) => setPost((s) => ({ ...s, calm: v }))} />
+          <CheckinSlider label="Focus" description="How sharp is your attention now?" value={post.focus} onChange={(v) => setPost((s) => ({ ...s, focus: v }))} />
+          <CheckinSlider label="Energy" description="How mentally energised do you feel?" value={post.energy} onChange={(v) => setPost((s) => ({ ...s, energy: v }))} />
+          <CheckinSlider label="Calm" description="How settled and grounded do you feel?" value={post.calm} onChange={(v) => setPost((s) => ({ ...s, calm: v }))} />
         </div>
         <div className="px-6 pb-10">
           <button onClick={handlePostSubmit}
