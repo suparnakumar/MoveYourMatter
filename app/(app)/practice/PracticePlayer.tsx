@@ -135,8 +135,8 @@ export default function PracticePlayer({
     setSaving(true);
     const today = new Date().toISOString().split("T")[0];
 
-    // Upsert session
-    await supabase.from("practice_sessions").upsert({
+    // Insert new session (multiple sessions per day allowed)
+    await supabase.from("practice_sessions").insert({
       user_id: userId,
       session_date: today,
       rasa_slug: rasa.slug,
@@ -152,30 +152,34 @@ export default function PracticePlayer({
       brain_shift_score: bss,
       duration_seconds: secondsElapsed,
       completed: true,
-    }, { onConflict: "user_id,session_date" });
+    });
 
-    // Update streak
+    // Update streak — only increment once per day
     const { data: existing } = await supabase
       .from("streaks")
       .select("current_streak, longest_streak, last_practice_date")
       .eq("user_id", userId)
       .maybeSingle();
 
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split("T")[0];
+    const alreadyPracticedToday = existing?.last_practice_date === today;
 
-    const isConsecutive = existing?.last_practice_date === yesterdayStr;
-    const newStreak = isConsecutive ? (existing?.current_streak ?? 0) + 1 : 1;
-    const newLongest = Math.max(newStreak, existing?.longest_streak ?? 0);
+    if (!alreadyPracticedToday) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-    await supabase.from("streaks").upsert({
-      user_id: userId,
-      current_streak: newStreak,
-      longest_streak: newLongest,
-      last_practice_date: today,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
+      const isConsecutive = existing?.last_practice_date === yesterdayStr;
+      const newStreak = isConsecutive ? (existing?.current_streak ?? 0) + 1 : 1;
+      const newLongest = Math.max(newStreak, existing?.longest_streak ?? 0);
+
+      await supabase.from("streaks").upsert({
+        user_id: userId,
+        current_streak: newStreak,
+        longest_streak: newLongest,
+        last_practice_date: today,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+    }
 
     router.push("/home");
   }

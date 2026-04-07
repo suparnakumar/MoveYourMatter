@@ -71,13 +71,15 @@ export default async function HomePage() {
         <div>
           <h2 className="text-stone-400 text-xs font-medium uppercase tracking-wider mb-3">Today&apos;s practice</h2>
           {sessionDoneToday ? (
-            <div className="bg-white rounded-2xl p-5 border border-stone-100 flex items-center gap-4 h-[calc(100%-28px)]">
-              <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-xl flex-shrink-0">✅</div>
-              <div className="flex-1">
-                <p className="font-medium text-stone-900">Done for today</p>
-                <p className="text-stone-400 text-sm">Score: {todaySession?.brain_shift_score} · See you tomorrow</p>
+            <Link href="/practice" className="block bg-white rounded-2xl p-5 border border-stone-100 hover:border-teal-200 transition-colors h-[calc(100%-28px)]">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-xl flex-shrink-0">✅</div>
+                <div className="flex-1">
+                  <p className="font-medium text-stone-900">Practiced today · BSS {todaySession?.brain_shift_score}</p>
+                  <p className="text-teal-600 text-sm">Practice again →</p>
+                </div>
               </div>
-            </div>
+            </Link>
           ) : (
             <Link href="/practice" className="block bg-white rounded-2xl p-5 border border-stone-100 hover:border-teal-200 transition-colors h-[calc(100%-28px)]">
               <div className="flex items-center gap-4">

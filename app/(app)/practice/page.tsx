@@ -37,19 +37,6 @@ export default async function PracticePage() {
     .limit(1)
     .maybeSingle();
 
-  if (todaySession) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-        <div className="text-5xl mb-4">✅</div>
-        <h1 className="text-2xl font-semibold text-stone-900 mb-2">You practiced today</h1>
-        <p className="text-stone-500 mb-2">Brain Shift Score: <strong className="text-teal-700">{todaySession.brain_shift_score}</strong></p>
-        <p className="text-stone-400 text-sm mb-8">Streak: {streak?.current_streak ?? 0} days 🔥</p>
-        <Link href="/home" className="px-6 py-3 rounded-2xl bg-teal-700 text-white font-medium hover:bg-teal-800 transition-colors">
-          Back to home
-        </Link>
-      </div>
-    );
-  }
 
   type ClipVideo = { url: string; title: string; duration_seconds: number };
   type PlanClip = { position: number; videos: ClipVideo[] };
