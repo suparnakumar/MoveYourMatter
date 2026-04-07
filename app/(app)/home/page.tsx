@@ -24,13 +24,49 @@ export default async function HomePage() {
   const today = new Date().toISOString().split("T")[0];
   const rasaWeek = currentRasaWeek();
 
-  const [{ data: streak }, { data: todaySession }, { data: rasa }, { data: recentSessions }] =
+  const [{ data: streak }, { data: todaySession }, { data: rasa }, { data: recentSessions }, { data: membership }] =
     await Promise.all([
       supabase.from("streaks").select("current_streak, longest_streak").eq("user_id", user!.id).maybeSingle(),
       supabase.from("practice_sessions").select("brain_shift_score, completed").eq("user_id", user!.id).eq("session_date", today).maybeSingle(),
       supabase.from("rasas").select("name, theme, colour, slug").eq("week_number", rasaWeek).single(),
       supabase.from("practice_sessions").select("brain_shift_score, session_date").eq("user_id", user!.id).eq("completed", true).order("session_date", { ascending: false }).limit(7),
+      supabase.from("cohort_members")
+        .select("cohort_id, cohorts(name, start_date, whatsapp_link)")
+        .eq("user_id", user!.id)
+        .maybeSingle(),
     ]);
+
+  // Resolve cohort day + today's message
+  let cohortDay: number | null = null;
+  let cohortName: string | null = null;
+  let cohortMessage: string | null = null;
+  let whatsappLink: string | null = null;
+
+  if (membership) {
+    const cohort = (membership as any).cohorts as {
+      name: string;
+      start_date: string;
+      whatsapp_link: string | null;
+    } | null;
+
+    if (cohort) {
+      cohortName = cohort.name;
+      whatsappLink = cohort.whatsapp_link;
+      const startMs = new Date(cohort.start_date + "T00:00:00").getTime();
+      const todayMs = new Date(today + "T00:00:00").getTime();
+      const day = Math.floor((todayMs - startMs) / 86400000) + 1;
+      if (day >= 1 && day <= 28) {
+        cohortDay = day;
+        const { data: entry } = await supabase
+          .from("cohort_schedule")
+          .select("message")
+          .eq("cohort_id", membership.cohort_id)
+          .eq("day_number", day)
+          .maybeSingle();
+        cohortMessage = entry?.message ?? null;
+      }
+    }
+  }
 
   const currentStreak = streak?.current_streak ?? 0;
   const sessionDoneToday = todaySession?.completed === true;
@@ -104,6 +140,35 @@ export default async function HomePage() {
               <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: rasa.colour }} />
               <span className="font-semibold text-stone-900">{rasa.name}</span>
               <span className="text-stone-400 text-sm">{rasa.theme}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Cohort card */}
+        {cohortDay !== null && (
+          <div className="rounded-2xl p-5 border border-teal-100 bg-teal-50 md:col-span-2">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-teal-600 uppercase tracking-wider font-medium mb-1">
+                  {cohortName} · Day {cohortDay} of 28
+                </p>
+                {cohortMessage && (
+                  <p className="text-stone-700 text-sm italic mt-1">&ldquo;{cohortMessage}&rdquo;</p>
+                )}
+              </div>
+              {whatsappLink && (
+                <a
+                  href={whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500 text-white text-xs font-medium hover:bg-green-600 transition-colors"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  WhatsApp group
+                </a>
+              )}
             </div>
           </div>
         )}

@@ -11,13 +11,15 @@ import VideoPlayer from "./VideoPlayer";
 type Phase = "pre" | "session" | "post" | "result";
 
 export default function PracticePlayer({
-  userId, rasa, currentStreak, sessionPlanId, videos,
+  userId, rasa, currentStreak, sessionPlanId, videos, motivationalMessage, whatsappLink,
 }: {
   userId: string;
   rasa: Rasa;
   currentStreak: number;
   sessionPlanId: string | null;
   videos: Video[];
+  motivationalMessage?: string | null;
+  whatsappLink?: string | null;
 }) {
   const hasVideo = videos.length > 0;
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -112,8 +114,13 @@ export default function PracticePlayer({
               <p className="text-xs uppercase tracking-widest text-stone-400 mb-2">{rasa.name} · {rasa.theme}</p>
               <h1 className="text-2xl font-semibold mb-2">{currentVideo.title}</h1>
               <p className="text-stone-400 text-sm max-w-xs">Follow along. Don't think about doing it right — just move.</p>
+              {motivationalMessage && (
+                <div className="mt-6 px-4 py-3 bg-teal-900/60 rounded-xl border border-teal-700/40 max-w-xs text-center">
+                  <p className="text-teal-200 text-sm italic">&ldquo;{motivationalMessage}&rdquo;</p>
+                </div>
+              )}
               <button onClick={startSession}
-                className="mt-10 w-full max-w-xs py-4 rounded-2xl bg-teal-600 text-white font-semibold text-lg hover:bg-teal-500 transition-colors">
+                className="mt-8 w-full max-w-xs py-4 rounded-2xl bg-teal-600 text-white font-semibold text-lg hover:bg-teal-500 transition-colors">
                 Begin session
               </button>
             </div>
