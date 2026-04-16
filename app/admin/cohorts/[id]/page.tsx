@@ -8,6 +8,7 @@ import AddMemberForm from "./AddMemberForm";
 import EditWhatsappLink from "./EditWhatsappLink";
 import RemoveMemberButton from "./RemoveMemberButton";
 import NotifyMembersButton from "./NotifyMembersButton";
+import EditStartDate from "./EditStartDate";
 
 export default async function AdminCohortPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -74,10 +75,7 @@ export default async function AdminCohortPage({ params }: { params: Promise<{ id
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white rounded-2xl border border-stone-200 px-5 py-4">
-          <p className="text-xs text-stone-400 mb-1">Start date</p>
-          <p className="font-medium text-stone-800">{cohort.start_date}</p>
-        </div>
+        <EditStartDate cohortId={id} current={cohort.start_date} />
         <div className="bg-white rounded-2xl border border-stone-200 px-5 py-4">
           <p className="text-xs text-stone-400 mb-1">Members</p>
           <p className="font-medium text-stone-800">{members.length}</p>
