@@ -39,7 +39,7 @@ export async function POST(req: Request) {
         ` : ""}
 
         <p style="font-size: 14px; color: #78716c; margin: 32px 0 0; line-height: 1.6;">
-          Sign in to the app to access your daily practice: <a href="https://app.moveyourmatter.com" style="color: #0f766e;">app.moveyourmatter.com</a>
+          Sign in to access your daily practice: <a href="https://moveyourmatter.com" style="color: #0f766e;">moveyourmatter.com</a>
         </p>
 
         <hr style="border: none; border-top: 1px solid #e7e5e4; margin: 32px 0;" />

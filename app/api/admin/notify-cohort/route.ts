@@ -92,7 +92,7 @@ export async function POST(req: Request) {
 
             ${videoTitle ? `<p style="font-size: 14px; color: #78716c; margin: 0 0 24px;">Today's practice: <strong style="color: #1c1917;">${videoTitle}</strong></p>` : ""}
 
-            <a href="https://app.moveyourmatter.com/practice" style="display: inline-block; background: #0f766e; color: #ffffff; font-size: 15px; font-weight: 500; text-decoration: none; padding: 14px 28px; border-radius: 100px;">
+            <a href="https://moveyourmatter.com/practice" style="display: inline-block; background: #0f766e; color: #ffffff; font-size: 15px; font-weight: 500; text-decoration: none; padding: 14px 28px; border-radius: 100px;">
               Start today's practice →
             </a>
 
