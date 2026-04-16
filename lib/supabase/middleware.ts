@@ -4,6 +4,7 @@ import {
   PROTECTED_ROUTES,
   POST_AUTH_ONBOARDING_ROUTES,
   GUEST_ONLY_ROUTES,
+  AUTH_UTILITY_ROUTES,
 } from "@/lib/route-config";
 
 export async function updateSession(request: NextRequest) {
@@ -51,6 +52,10 @@ export async function updateSession(request: NextRequest) {
     loginUrl.pathname = "/auth/login";
     return NextResponse.redirect(loginUrl);
   }
+
+  // Auth utility routes (e.g. reset-password) are always accessible
+  const isAuthUtility = AUTH_UTILITY_ROUTES.some((r) => pathname.startsWith(r));
+  if (isAuthUtility) return supabaseResponse;
 
   // Redirect signed-in users away from guest-only routes
   const isGuestOnly =
