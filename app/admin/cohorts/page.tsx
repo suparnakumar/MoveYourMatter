@@ -1,6 +1,9 @@
+export const dynamic = "force-dynamic";
+
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import NewCohortForm from "./NewCohortForm";
+import DeleteCohortButton from "./DeleteCohortButton";
 
 export default async function AdminCohortsPage() {
   const supabase = await createClient();
@@ -34,6 +37,7 @@ export default async function AdminCohortsPage() {
                 }`}>
                   {c.active ? "Active" : "Inactive"}
                 </span>
+                <DeleteCohortButton cohortId={c.id} cohortName={c.name} />
                 <Link
                   href={`/admin/cohorts/${c.id}`}
                   className="text-sm font-medium text-teal-700 hover:text-teal-900 transition-colors"

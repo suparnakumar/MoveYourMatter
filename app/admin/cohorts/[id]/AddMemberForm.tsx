@@ -4,7 +4,15 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
-export default function AddMemberForm({ cohortId }: { cohortId: string }) {
+export default function AddMemberForm({
+  cohortId,
+  cohortName,
+  whatsappLink,
+}: {
+  cohortId: string;
+  cohortName: string;
+  whatsappLink: string | null;
+}) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [resolvedUser, setResolvedUser] = useState<{ id: string; email: string; full_name?: string } | null>(null);
@@ -50,6 +58,18 @@ export default function AddMemberForm({ cohortId }: { cohortId: string }) {
       return;
     }
 
+    // Send welcome email with WhatsApp link
+    await fetch("/api/admin/send-cohort-welcome", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        memberEmail: resolvedUser.email,
+        memberName: resolvedUser.full_name ?? null,
+        cohortName,
+        whatsappLink,
+      }),
+    });
+
     setEmail("");
     setResolvedUser(null);
     setSaving(false);
@@ -80,7 +100,7 @@ export default function AddMemberForm({ cohortId }: { cohortId: string }) {
       </form>
 
       {error && <p className="text-sm text-rose-600">{error}</p>}
-      {success && <p className="text-sm text-teal-600">Member added ✓</p>}
+      {success && <p className="text-sm text-teal-600">Member added and welcome email sent ✓</p>}
 
       {resolvedUser && (
         <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-teal-50 border border-teal-100">

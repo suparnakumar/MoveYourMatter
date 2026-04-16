@@ -5,6 +5,9 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddMemberForm from "./AddMemberForm";
+import EditWhatsappLink from "./EditWhatsappLink";
+import RemoveMemberButton from "./RemoveMemberButton";
+import NotifyMembersButton from "./NotifyMembersButton";
 
 export default async function AdminCohortPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -59,12 +62,15 @@ export default async function AdminCohortPage({ params }: { params: Promise<{ id
       </div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-stone-900">{cohort.name}</h1>
-        <Link
-          href={`/admin/cohorts/${id}/schedule`}
-          className="px-4 py-2 rounded-xl bg-teal-700 text-white text-sm font-medium hover:bg-teal-800 transition-colors"
-        >
-          Edit schedule →
-        </Link>
+        <div className="flex items-center gap-3">
+          <NotifyMembersButton cohortId={id} />
+          <Link
+            href={`/admin/cohorts/${id}/schedule`}
+            className="px-4 py-2 rounded-xl bg-teal-700 text-white text-sm font-medium hover:bg-teal-800 transition-colors"
+          >
+            Edit schedule →
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
@@ -76,21 +82,13 @@ export default async function AdminCohortPage({ params }: { params: Promise<{ id
           <p className="text-xs text-stone-400 mb-1">Members</p>
           <p className="font-medium text-stone-800">{members.length}</p>
         </div>
-        {cohort.whatsapp_link && (
-          <div className="bg-white rounded-2xl border border-stone-200 px-5 py-4">
-            <p className="text-xs text-stone-400 mb-1">WhatsApp</p>
-            <a href={cohort.whatsapp_link} target="_blank" rel="noopener noreferrer"
-              className="text-sm font-medium text-teal-700 hover:underline">
-              Group link ↗
-            </a>
-          </div>
-        )}
+        <EditWhatsappLink cohortId={id} current={cohort.whatsapp_link} />
       </div>
 
       {/* Add member */}
       <div className="bg-white rounded-2xl border border-stone-200 p-6 mb-6">
         <h2 className="text-sm font-semibold text-stone-700 mb-4">Add member</h2>
-        <AddMemberForm cohortId={id} />
+        <AddMemberForm cohortId={id} cohortName={cohort.name} whatsappLink={cohort.whatsapp_link} />
       </div>
 
       {/* Members table */}
@@ -104,7 +102,7 @@ export default async function AdminCohortPage({ params }: { params: Promise<{ id
           <table className="w-full text-sm">
             <thead className="border-b border-stone-100">
               <tr>
-                {["Name", "Email", "Phone", "Joined"].map((h) => (
+                {["Name", "Email", "Phone", "Joined", ""].map((h) => (
                   <th key={h} className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -116,6 +114,9 @@ export default async function AdminCohortPage({ params }: { params: Promise<{ id
                   <td className="px-6 py-4 text-stone-500">{m.info?.email ?? "—"}</td>
                   <td className="px-6 py-4 text-stone-500">{m.info?.phone ?? "—"}</td>
                   <td className="px-6 py-4 text-stone-400">{new Date(m.created_at).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 text-right">
+                    <RemoveMemberButton membershipId={m.id} memberName={m.info?.full_name ?? m.info?.email ?? "this member"} />
+                  </td>
                 </tr>
               ))}
             </tbody>
