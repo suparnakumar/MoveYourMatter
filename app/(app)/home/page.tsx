@@ -7,7 +7,7 @@ import Greeting from "./Greeting";
 function ScoreBand({ score }: { score: number }) {
   if (score >= 80) return <span className="text-teal-600 text-xs font-medium">Strong</span>;
   if (score >= 60) return <span className="text-amber-600 text-xs font-medium">Developing</span>;
-  return <span className="text-rose-500 text-xs font-medium">Needs attention</span>;
+  return <span className="text-stone-400 text-xs font-medium">Room to grow</span>;
 }
 
 export default async function HomePage() {
@@ -66,11 +66,13 @@ export default async function HomePage() {
 
   const today = new Date().toISOString().split("T")[0];
   let cohortDay: number | null = null;
+  let cohortComplete = false;
   if (cohort) {
     const startMs = new Date(cohort.start_date + "T00:00:00").getTime();
     const todayMs = new Date(today + "T00:00:00").getTime();
-    const day = Math.floor((todayMs - startMs) / 86400000) + 1;
-    if (day >= 1 && day <= 28) cohortDay = day;
+    const rawDay = Math.floor((todayMs - startMs) / 86400000) + 1;
+    if (rawDay >= 1 && rawDay <= 28) cohortDay = rawDay;
+    if (rawDay > 28) cohortComplete = true;
   }
 
   const domains = survey ? [
@@ -165,18 +167,33 @@ export default async function HomePage() {
           ) : null}
 
           {/* Next step */}
-          <Link
-            href="/videos"
-            className="flex items-center justify-between w-full bg-white rounded-2xl border border-stone-100 px-4 py-4 hover:border-teal-200 transition-colors"
-          >
-            <div>
-              <p className="text-xs text-stone-400 mb-0.5">Ready to start?</p>
-              <p className="font-medium text-stone-800">Watch today&apos;s video</p>
-            </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-teal-600 flex-shrink-0">
-              <path d="M9 18l6-6-6-6"/>
-            </svg>
-          </Link>
+          {cohortComplete ? (
+            <Link
+              href={`/survey/baseline?cohort=${membership?.cohort_id}&type=post&return=/home`}
+              className="flex items-center justify-between w-full bg-teal-700 rounded-2xl px-4 py-4 hover:bg-teal-800 transition-colors"
+            >
+              <div>
+                <p className="text-teal-200 text-xs mb-0.5">The program is complete!</p>
+                <p className="font-medium text-white">Take your post-survey to see how far you&apos;ve come</p>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-teal-300 flex-shrink-0">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </Link>
+          ) : (
+            <Link
+              href="/videos"
+              className="flex items-center justify-between w-full bg-white rounded-2xl border border-stone-100 px-4 py-4 hover:border-teal-200 transition-colors"
+            >
+              <div>
+                <p className="text-xs text-stone-400 mb-0.5">Ready to start?</p>
+                <p className="font-medium text-stone-800">Watch today&apos;s video</p>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-teal-600 flex-shrink-0">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </Link>
+          )}
         </>
       ) : membership?.cohort_id ? (
         <div className="bg-white rounded-2xl border border-stone-100 p-8 text-center">

@@ -57,7 +57,7 @@ export default async function VideosPage() {
           <p className="text-stone-400 text-sm">No videos scheduled yet — check back soon.</p>
         </div>
       ) : (
-        <VideoLibrary entries={entries} />
+        <VideoLibrary entries={entries} currentDay={currentDay} />
       )}
     </div>
   );

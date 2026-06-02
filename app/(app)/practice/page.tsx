@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { currentRasaWeek } from "@/lib/bss";
 import type { Video } from "@/lib/types";
 import PracticePlayer from "./PracticePlayer";
@@ -6,6 +7,15 @@ import PracticePlayer from "./PracticePlayer";
 export default async function PracticePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Cohort members use the video library, not the practice player
+  const { data: cohortCheck } = await supabase
+    .from("cohort_members")
+    .select("cohort_id")
+    .eq("user_id", user!.id)
+    .maybeSingle();
+
+  if (cohortCheck?.cohort_id) redirect("/videos");
 
   const rasaWeek = currentRasaWeek();
   const today = new Date().toISOString().split("T")[0];

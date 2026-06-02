@@ -24,7 +24,7 @@ function formatDuration(seconds: number) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
-export default function VideoLibrary({ entries }: { entries: Entry[] }) {
+export default function VideoLibrary({ entries, currentDay }: { entries: Entry[]; currentDay: number }) {
   const [expanded, setExpanded] = useState<number | null>(null);
 
   return (
@@ -35,6 +35,7 @@ export default function VideoLibrary({ entries }: { entries: Entry[] }) {
 
         const videoId = getYouTubeId(video.url);
         const isOpen = expanded === entry.day_number;
+        const isToday = entry.day_number === currentDay;
 
         return (
           <div
@@ -106,9 +107,14 @@ export default function VideoLibrary({ entries }: { entries: Entry[] }) {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-teal-600 uppercase tracking-wide mb-0.5">
-                    Day {entry.day_number}
-                  </p>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="text-xs font-semibold text-teal-600 uppercase tracking-wide">
+                      Day {entry.day_number}
+                    </p>
+                    {isToday && (
+                      <span className="px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 text-xs font-semibold">Today</span>
+                    )}
+                  </div>
                   <p className="font-medium text-stone-800 truncate">{video.title}</p>
                   {video.duration_seconds && (
                     <p className="text-xs text-stone-400 mt-0.5">{formatDuration(video.duration_seconds)}</p>

@@ -5,10 +5,10 @@ import { useState, useRef, useEffect } from "react";
 type Message = { role: "user" | "assistant"; content: string };
 
 const SUGGESTED = [
-  "What does this week's rasa mean for my brain?",
-  "How does Kathak movement help with focus?",
+  "How does learning Kathak movement improve brain health?",
   "I'm feeling low energy today — what should I know?",
-  "How do I build a consistent practice habit?",
+  "How do I stay consistent with the daily videos?",
+  "What brain changes should I expect after 28 days?",
 ];
 
 export default function CoachChat() {
