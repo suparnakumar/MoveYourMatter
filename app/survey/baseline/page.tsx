@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import SurveyClient from "./SurveyClient";
 
 export default async function SurveyBaselinePage({
@@ -17,6 +18,39 @@ export default async function SurveyBaselinePage({
   if (!user) {
     const next = `/survey/baseline?cohort=${cohort ?? ""}&type=${surveyType}`;
     redirect(`/auth/login?next=${encodeURIComponent(next)}`);
+  }
+
+  // Auto-enroll in the cohort if not already a member
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (cohort && serviceKey) {
+    const admin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceKey,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
+    const { data: existing } = await admin
+      .from("cohort_members")
+      .select("cohort_id")
+      .eq("user_id", user.id)
+      .eq("cohort_id", cohort)
+      .maybeSingle();
+
+    if (!existing) {
+      // Verify the cohort exists before inserting
+      const { data: cohortRow } = await admin
+        .from("cohorts")
+        .select("id")
+        .eq("id", cohort)
+        .maybeSingle();
+
+      if (cohortRow) {
+        await admin.from("cohort_members").insert({
+          cohort_id: cohort,
+          user_id: user.id,
+        });
+      }
+    }
   }
 
   const userEmail = user.email ?? "";
