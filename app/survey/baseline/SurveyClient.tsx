@@ -183,16 +183,18 @@ function DomainBar({
 export default function SurveyClient({
   cohortId,
   surveyType,
-  returnTo,
+  userEmail,
+  userName,
 }: {
   cohortId: string;
   surveyType: "pre" | "post";
-  returnTo?: string;
+  userEmail: string;
+  userName: string;
 }) {
   const [section, setSection] = useState<Section>("intro");
   const [scienceOpen, setScienceOpen] = useState(false);
   const [form, setForm] = useState<Form>({
-    name: "", email: "", age: "",
+    name: userName, email: userEmail, age: "",
     q1: null, q2: null, q3: null,
     q4: null, q5: null,
     q6: null, q7: null,
@@ -251,7 +253,7 @@ export default function SurveyClient({
   // ── Intro ──────────────────────────────────────────────────────────────────
 
   if (section === "intro") {
-    const canProceed = form.name.trim().length > 0 && form.email.trim().length > 0;
+    const canProceed = form.name.trim().length > 0;
 
     return (
       <div className="min-h-screen bg-stone-50">
@@ -312,10 +314,9 @@ export default function SurveyClient({
             />
             <input
               type="email"
-              placeholder="Email address"
               value={form.email}
-              onChange={(e) => set("email", e.target.value)}
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              readOnly
+              className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 border border-stone-200 text-stone-400 cursor-default"
             />
             <input
               type="number"
@@ -643,30 +644,12 @@ export default function SurveyClient({
             </div>
           )}
 
-          {/* Account CTA */}
-          {returnTo ? (
-            <a
-              href={returnTo}
-              className="block w-full py-4 rounded-2xl bg-teal-700 text-white text-center font-semibold text-base hover:bg-teal-800 transition-colors"
-            >
-              Go to your home page →
-            </a>
-          ) : (
-            <>
-              <a
-                href="/auth/login"
-                className="block w-full py-4 rounded-2xl bg-teal-700 text-white text-center font-semibold text-base hover:bg-teal-800 transition-colors"
-              >
-                Sign in to your account
-              </a>
-              <a
-                href="/auth/signup"
-                className="block text-center text-teal-700 text-sm font-medium mt-4 hover:underline"
-              >
-                New here? Create a free account
-              </a>
-            </>
-          )}
+          <a
+            href="/home"
+            className="block w-full py-4 rounded-2xl bg-teal-700 text-white text-center font-semibold text-base hover:bg-teal-800 transition-colors"
+          >
+            Go to your home page →
+          </a>
         </div>
       </div>
     );

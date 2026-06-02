@@ -8,7 +8,6 @@ export default function SignupForm() {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,27 +15,10 @@ export default function SignupForm() {
 
   const supabase = createClient();
 
-  function normalisePhone(raw: string): string | null {
-    // Strip spaces, dashes, parentheses
-    let digits = raw.replace(/[\s\-().]/g, "");
-    // Ensure it starts with +
-    if (!digits.startsWith("+")) digits = "+" + digits;
-    // Must be + followed by 7–15 digits
-    if (!/^\+\d{7,15}$/.test(digits)) return null;
-    return digits;
-  }
-
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
-    const normalisedPhone = normalisePhone(phone);
-    if (!normalisedPhone) {
-      setError("Enter a valid phone number with country code, e.g. +91 98765 43210");
-      setLoading(false);
-      return;
-    }
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -44,7 +26,6 @@ export default function SignupForm() {
       options: {
         data: {
           full_name: fullName,
-          phone: normalisedPhone,
           onboarding_complete: true,
         },
       },
@@ -114,13 +95,6 @@ export default function SignupForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-          />
-          <input
-            type="tel"
-            placeholder="e.g. +1 415 555 0123"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
             className="w-full px-4 py-3 rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
           />
           <input

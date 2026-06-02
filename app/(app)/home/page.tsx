@@ -52,7 +52,7 @@ export default async function HomePage() {
       .maybeSingle();
 
     if (!data) {
-      redirect(`/survey/baseline?cohort=${membership.cohort_id}&type=pre&return=/home`);
+      redirect(`/survey/baseline?cohort=${membership.cohort_id}&type=pre`);
     }
 
     survey = data;
@@ -169,7 +169,7 @@ export default async function HomePage() {
           {/* Next step */}
           {cohortComplete ? (
             <Link
-              href={`/survey/baseline?cohort=${membership?.cohort_id}&type=post&return=/home`}
+              href={`/survey/baseline?cohort=${membership?.cohort_id}&type=post`}
               className="flex items-center justify-between w-full bg-teal-700 rounded-2xl px-4 py-4 hover:bg-teal-800 transition-colors"
             >
               <div>

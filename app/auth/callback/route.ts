@@ -11,15 +11,6 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Check if this is a new user completing onboarding
-      const { data: { user } } = await supabase.auth.getUser();
-      const isNew = user?.user_metadata?.onboarding_complete !== true;
-
-      if (isNew && next === "/home") {
-        // New user — send to step 6 of onboarding (question screen)
-        return NextResponse.redirect(`${origin}/onboarding/goal`);
-      }
-
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

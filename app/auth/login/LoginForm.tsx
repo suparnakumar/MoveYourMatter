@@ -56,7 +56,7 @@ export default function LoginForm() {
         <div className="text-center mb-10">
           <p className="text-teal-700 text-sm font-medium tracking-widest uppercase mb-3">MoveYourMatter</p>
           <h1 className="text-3xl font-semibold text-stone-900 leading-tight">Welcome back</h1>
-          <p className="text-stone-500 mt-2">Sign in to continue your practice</p>
+          <p className="text-stone-500 mt-2">Sign in to access your cohort</p>
         </div>
 
         {error && (
