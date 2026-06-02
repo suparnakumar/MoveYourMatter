@@ -187,7 +187,7 @@ export default async function HomePage() {
             >
               <div>
                 <p className="text-xs text-stone-400 mb-0.5">Ready to start?</p>
-                <p className="font-medium text-stone-800">Watch today&apos;s video</p>
+                <p className="font-medium text-stone-800">Watch the latest video</p>
               </div>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-teal-600 flex-shrink-0">
                 <path d="M9 18l6-6-6-6"/>

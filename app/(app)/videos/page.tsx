@@ -45,7 +45,7 @@ export default async function VideosPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-stone-900">Your Videos</h1>
-          <p className="text-stone-400 text-sm mt-0.5">{cohort.name} · Day {currentDay} of 28</p>
+          <p className="text-stone-400 text-sm mt-0.5">{cohort.name} · Week {Math.min(Math.ceil(currentDay / 7), 4)} of 4</p>
         </div>
         <span className="text-xs text-stone-400 bg-stone-100 px-3 py-1 rounded-full">
           {entries?.length ?? 0} released
@@ -57,7 +57,7 @@ export default async function VideosPage() {
           <p className="text-stone-400 text-sm">No videos scheduled yet — check back soon.</p>
         </div>
       ) : (
-        <VideoLibrary entries={entries} currentDay={currentDay} />
+        <VideoLibrary entries={entries} />
       )}
     </div>
   );
