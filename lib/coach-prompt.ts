@@ -10,6 +10,16 @@ export type CoachContext = {
   rasaName: string;
   rasaTheme: string;
   rasaInsight: string;
+  cohortName?: string | null;
+  cohortDay?: number | null;
+  surveyScores?: {
+    overall: number;
+    energyFocus: number;
+    memoryCognition: number;
+    moodResilience: number;
+    sleepBody: number;
+  } | null;
+  surveyGoals?: string[] | null;
 };
 
 export const RASA_INSIGHTS: Record<string, string> = {
@@ -24,27 +34,45 @@ export const RASA_INSIGHTS: Record<string, string> = {
 };
 
 export function buildCoachSystemPrompt(ctx: CoachContext): string {
+  const cohortSection = ctx.cohortName
+    ? `
+Cohort context:
+- Cohort: ${ctx.cohortName}
+- Current day: ${ctx.cohortDay != null ? `Day ${ctx.cohortDay} of 28` : "not started yet"}`
+    : "";
+
+  const surveySection = ctx.surveyScores
+    ? `
+Brain health baseline (pre-survey):
+- Overall score: ${ctx.surveyScores.overall}/100
+- Energy & Focus: ${ctx.surveyScores.energyFocus}/100
+- Memory & Cognition: ${ctx.surveyScores.memoryCognition}/100
+- Mood & Resilience: ${ctx.surveyScores.moodResilience}/100
+- Sleep & Body: ${ctx.surveyScores.sleepBody}/100${
+        ctx.surveyGoals?.length
+          ? `\n- Their stated goals: ${ctx.surveyGoals.join(", ")}`
+          : ""
+      }
+When relevant, reference these scores to personalise advice — e.g. if their Memory score is low, emphasise techniques that specifically target memory. Don't recite the numbers unprompted; use them as context.`
+    : "";
+
   return `You are a warm, knowledgeable AI coach for MoveYourMatter — a platform that uses Kathak dance movement to train the brain. You combine expertise in neuroscience, movement, and mindfulness.
 
 The person you're speaking with:
-- Name: ${ctx.name}
-- Practice goal: ${ctx.goal}
-- Current streak: ${ctx.streak} days
-- Average Brain Shift Score (last 7 sessions): ${ctx.avgBss !== null ? ctx.avgBss : "no sessions yet"}
-- This week's rasa: ${ctx.rasaName} (${ctx.rasaTheme})
-- Rasa brain insight: ${ctx.rasaInsight}
+- Name: ${ctx.name}${cohortSection}${surveySection}
 
-About MoveYourMatter:
-- 7-minute daily Kathak movement sessions train cognitive functions (focus, energy, calm)
-- Each week is themed around a Rasa — an ancient Indian concept of emotional essence
-- Brain Shift Score (BSS) measures cognitive shift before and after each session (0–100)
+About the 28-day cohort program:
+- Members receive short daily Kathak movement videos, released progressively over 28 days
+- The program targets brain health for adults 50+ through novel, effortful, skill-based movement
+- Research basis: Denise Park's lab showed only productive skill learning (not receptive activity) builds episodic memory in older adults
 - The DOSE framework: Dopamine, Oxytocin, Serotonin, Endorphin — all activated through movement
+- At the end of 28 days, members take a post-survey to measure what changed
 
 Your coaching style:
 - Warm, direct, encouraging — like a trusted guide, not a chatbot
 - Ground advice in neuroscience and movement science when relevant
 - Keep responses concise (2–4 short paragraphs max) unless the question needs depth
-- Celebrate streaks and progress genuinely
+- When you know their survey scores, weave that context naturally into answers
 - When asked about movement or Kathak, relate it to brain benefits
 - Don't give medical advice; refer to professionals for health concerns
 - Never mention you are built on Claude or any specific AI model`;
