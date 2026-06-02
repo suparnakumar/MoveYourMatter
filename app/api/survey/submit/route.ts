@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
 
 function adminClient() {
   return createClient(
@@ -82,6 +83,35 @@ export async function POST(req: Request) {
         sleepBody: pre.sleep_body_score,
       };
     }
+  }
+
+  // Notify admin — fire and forget, don't block the response
+  if (process.env.RESEND_API_KEY) {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const label = surveyType === "pre" ? "Pre-survey" : "Post-survey";
+    resend.emails.send({
+      from: "MoveYourMatter <suparna@moveyourmatter.com>",
+      to: "suparna@gmail.com",
+      subject: `${label} completed — ${name.trim()}`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 24px; background: #fafaf9;">
+          <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #0f766e; margin: 0 0 24px;">MoveYourMatter</p>
+          <h2 style="font-size: 20px; font-weight: 600; color: #1c1917; margin: 0 0 16px;">${label} completed</h2>
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #44403c;">
+            <tr><td style="padding: 6px 0; color: #78716c;">Name</td><td style="padding: 6px 0; font-weight: 500; color: #1c1917;">${name.trim()}</td></tr>
+            <tr><td style="padding: 6px 0; color: #78716c;">Email</td><td style="padding: 6px 0;">${normalEmail}</td></tr>
+            <tr><td style="padding: 6px 0; color: #78716c;">Overall</td><td style="padding: 6px 0; font-weight: 600; color: #0f766e;">${overall} / 100</td></tr>
+            <tr><td style="padding: 6px 0; color: #78716c;">Energy & Focus</td><td style="padding: 6px 0;">${energyFocus}</td></tr>
+            <tr><td style="padding: 6px 0; color: #78716c;">Memory & Cognition</td><td style="padding: 6px 0;">${memoryCognition}</td></tr>
+            <tr><td style="padding: 6px 0; color: #78716c;">Mood & Resilience</td><td style="padding: 6px 0;">${moodResilience}</td></tr>
+            <tr><td style="padding: 6px 0; color: #78716c;">Sleep & Body</td><td style="padding: 6px 0;">${sleepBody}</td></tr>
+          </table>
+          <p style="margin: 24px 0 0;">
+            <a href="https://moveyourmatter.com/admin/cohorts/${cohortId}/survey" style="color: #0f766e; font-size: 14px;">View all responses →</a>
+          </p>
+        </div>
+      `,
+    }).catch(() => {});
   }
 
   return NextResponse.json({ ok: true, preScores });
