@@ -164,17 +164,20 @@ export default async function HomePage() {
             </div>
           ) : null}
         </>
+      ) : membership?.cohort_id ? (
+        <div className="bg-white rounded-2xl border border-stone-100 p-8 text-center">
+          <p className="text-stone-400 text-sm mb-3">Complete your brain health survey to see your baseline.</p>
+          <Link
+            href={`/survey/baseline?cohort=${membership.cohort_id}&type=pre`}
+            className="inline-block px-5 py-2 rounded-xl bg-teal-700 text-white text-sm font-medium hover:bg-teal-800 transition-colors"
+          >
+            Take the survey
+          </Link>
+        </div>
       ) : (
         <div className="bg-white rounded-2xl border border-stone-100 p-8 text-center">
-          <p className="text-stone-400 text-sm mb-3">You haven&apos;t taken the brain health survey yet.</p>
-          {membership?.cohort_id && (
-            <Link
-              href={`/survey/baseline?cohort=${membership.cohort_id}&type=pre`}
-              className="inline-block px-5 py-2 rounded-xl bg-teal-700 text-white text-sm font-medium hover:bg-teal-800 transition-colors"
-            >
-              Take the survey
-            </Link>
-          )}
+          <p className="text-stone-400 text-sm">You&apos;re not enrolled in a cohort yet.</p>
+          <p className="text-stone-300 text-xs mt-1">Your brain health baseline will appear here once you&apos;re enrolled.</p>
         </div>
       )}
     </div>
