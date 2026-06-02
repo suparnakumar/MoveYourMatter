@@ -46,10 +46,10 @@ export default function Navbar() {
           ))}
           {loggedIn ? (
             <Link
-              href="/home"
+              href="/videos"
               className="ml-2 px-4 py-2 rounded-full bg-teal-700 text-white text-sm font-medium hover:bg-teal-800 transition-colors"
             >
-              Go to practice
+              Go to videos
             </Link>
           ) : (
             <Link
@@ -92,11 +92,11 @@ export default function Navbar() {
           ))}
           {loggedIn ? (
             <Link
-              href="/home"
+              href="/videos"
               onClick={() => setOpen(false)}
               className="px-4 py-2 rounded-full bg-teal-700 text-white text-sm font-medium text-center"
             >
-              Go to practice
+              Go to videos
             </Link>
           ) : (
             <Link
