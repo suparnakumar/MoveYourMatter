@@ -643,16 +643,16 @@ export default function SurveyClient({
 
           {/* Account CTA */}
           <a
-            href="/auth/signup"
+            href="/auth/login"
             className="block w-full py-4 rounded-2xl bg-teal-700 text-white text-center font-semibold text-base hover:bg-teal-800 transition-colors"
           >
-            Create your account to track progress
+            Sign in to your account
           </a>
           <a
-            href="/auth/login"
+            href="/auth/signup"
             className="block text-center text-teal-700 text-sm font-medium mt-4 hover:underline"
           >
-            Already have an account? Sign in
+            New here? Create a free account
           </a>
         </div>
       </div>
