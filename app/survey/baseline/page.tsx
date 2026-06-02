@@ -20,7 +20,6 @@ export default async function SurveyBaselinePage({
     redirect(`/auth/login?next=${encodeURIComponent(next)}`);
   }
 
-  // Auto-enroll in the cohort if not already a member
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (cohort && serviceKey) {
     const admin = createAdminClient(
@@ -29,15 +28,26 @@ export default async function SurveyBaselinePage({
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    const { data: existing } = await admin
+    // If they've already submitted this survey type, send them home
+    const { data: submitted } = await admin
+      .from("brain_health_surveys")
+      .select("id")
+      .eq("cohort_id", cohort)
+      .eq("member_email", user.email!.toLowerCase())
+      .eq("survey_type", surveyType)
+      .maybeSingle();
+
+    if (submitted) redirect("/home");
+
+    // Auto-enroll in the cohort if not already a member
+    const { data: member } = await admin
       .from("cohort_members")
       .select("cohort_id")
       .eq("user_id", user.id)
       .eq("cohort_id", cohort)
       .maybeSingle();
 
-    if (!existing) {
-      // Verify the cohort exists before inserting
+    if (!member) {
       const { data: cohortRow } = await admin
         .from("cohorts")
         .select("id")
