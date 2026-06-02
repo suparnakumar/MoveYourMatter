@@ -10,6 +10,60 @@ function formatTime(s: number) {
   return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
+function isYouTubeUrl(url: string) {
+  return url.includes("youtube.com/embed/");
+}
+
+// ── YouTube iframe player ─────────────────────────────────────────────────────
+
+function YouTubePlayer({
+  url, title, onEnded,
+}: {
+  url: string; title?: string; onEnded?: () => void;
+}) {
+  // Append enablejsapi so YouTube sends postMessage state events
+  const src = url.includes("?")
+    ? `${url}&enablejsapi=1&rel=0`
+    : `${url}?enablejsapi=1&rel=0`;
+
+  useEffect(() => {
+    if (!onEnded) return;
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== "https://www.youtube.com") return;
+      try {
+        const data = JSON.parse(event.data as string);
+        // YouTube state 0 = ended
+        if (data.event === "onStateChange" && data.info === 0) {
+          onEnded!();
+        }
+      } catch {
+        // ignore non-JSON messages
+      }
+    }
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [onEnded]);
+
+  return (
+    <div className="relative w-full bg-black" style={{ aspectRatio: "16/9" }}>
+      {title && (
+        <div className="absolute top-0 left-0 right-0 px-4 pt-3 z-10 pointer-events-none">
+          <p className="text-white text-sm font-medium drop-shadow">{title}</p>
+        </div>
+      )}
+      <iframe
+        src={src}
+        className="absolute inset-0 w-full h-full"
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowFullScreen
+        title={title}
+      />
+    </div>
+  );
+}
+
+// ── Native video player ───────────────────────────────────────────────────────
+
 export default function VideoPlayer({
   url,
   title,
@@ -20,6 +74,18 @@ export default function VideoPlayer({
   title?: string;
   onEnded?: () => void;
   onProgress?: (seconds: number) => void;
+}) {
+  if (isYouTubeUrl(url)) {
+    return <YouTubePlayer url={url} title={title} onEnded={onEnded} />;
+  }
+
+  return <NativePlayer url={url} title={title} onEnded={onEnded} onProgress={onProgress} />;
+}
+
+function NativePlayer({
+  url, title, onEnded, onProgress,
+}: {
+  url: string; title?: string; onEnded?: () => void; onProgress?: (seconds: number) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,7 +99,6 @@ export default function VideoPlayer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
 
-  // Auto-hide controls after 3s when playing
   const resetHideTimer = useCallback(() => {
     setShowControls(true);
     if (hideControlsTimer.current) clearTimeout(hideControlsTimer.current);
@@ -47,7 +112,6 @@ export default function VideoPlayer({
     return () => { if (hideControlsTimer.current) clearTimeout(hideControlsTimer.current); };
   }, [playing, resetHideTimer]);
 
-  // Fullscreen change listener
   useEffect(() => {
     const handler = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handler);
@@ -88,11 +152,8 @@ export default function VideoPlayer({
   async function toggleFullscreen() {
     const el = containerRef.current;
     if (!el) return;
-    if (!document.fullscreenElement) {
-      await el.requestFullscreen();
-    } else {
-      await document.exitFullscreen();
-    }
+    if (!document.fullscreenElement) await el.requestFullscreen();
+    else await document.exitFullscreen();
     resetHideTimer();
   }
 
@@ -119,17 +180,14 @@ export default function VideoPlayer({
         playsInline
       />
 
-      {/* Gradient overlay */}
       <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`} />
 
-      {/* Title */}
       {title && showControls && (
         <div className="absolute top-0 left-0 right-0 px-4 pt-4 pb-2">
           <p className="text-white text-sm font-medium drop-shadow">{title}</p>
         </div>
       )}
 
-      {/* Centre play/pause */}
       <div className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}>
         <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
           {playing ? (
@@ -137,27 +195,19 @@ export default function VideoPlayer({
               <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
             </svg>
           ) : (
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
           )}
         </div>
       </div>
 
-      {/* Bottom controls */}
       <div
         className={`absolute bottom-0 left-0 right-0 px-4 pb-4 pt-8 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Progress bar */}
         <div className="mb-2 flex items-center gap-2">
           <span className="text-white/70 text-xs tabular-nums w-10">{formatTime(currentTime)}</span>
           <input
-            type="range"
-            min={0}
-            max={duration || 100}
-            step={0.1}
-            value={currentTime}
+            type="range" min={0} max={duration || 100} step={0.1} value={currentTime}
             onChange={handleSeek}
             className="flex-1 h-1 accent-teal-400 cursor-pointer"
             style={{ accentColor: "#2dd4bf" }}
@@ -165,23 +215,18 @@ export default function VideoPlayer({
           <span className="text-white/70 text-xs tabular-nums w-10 text-right">{formatTime(duration)}</span>
         </div>
 
-        {/* Controls row */}
         <div className="flex items-center justify-between">
-          {/* Play/pause */}
           <button onClick={togglePlay} className="text-white hover:text-teal-300 transition-colors">
             {playing ? (
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
               </svg>
             ) : (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             )}
           </button>
 
           <div className="flex items-center gap-4">
-            {/* Speed selector */}
             <div className="relative">
               <button
                 onClick={(e) => { e.stopPropagation(); setSpeedMenuOpen((o) => !o); resetHideTimer(); }}
@@ -192,9 +237,7 @@ export default function VideoPlayer({
               {speedMenuOpen && (
                 <div className="absolute bottom-9 right-0 bg-stone-900 border border-white/10 rounded-xl overflow-hidden shadow-xl">
                   {SPEEDS.map((s) => (
-                    <button
-                      key={s}
-                      onClick={(e) => { e.stopPropagation(); setPlaybackSpeed(s); }}
+                    <button key={s} onClick={(e) => { e.stopPropagation(); setPlaybackSpeed(s); }}
                       className={`block w-full px-5 py-2.5 text-sm text-left transition-colors ${s === speed ? "text-teal-400 bg-white/5" : "text-white hover:bg-white/10"}`}
                     >
                       {s}x
@@ -204,7 +247,6 @@ export default function VideoPlayer({
               )}
             </div>
 
-            {/* Fullscreen */}
             <button onClick={toggleFullscreen} className="text-white/80 hover:text-white transition-colors">
               {isFullscreen ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -219,6 +261,10 @@ export default function VideoPlayer({
           </div>
         </div>
       </div>
+
+      {progress > 0 && (
+        <div className="absolute top-0 left-0 h-0.5 bg-teal-400 transition-all duration-300" style={{ width: `${progress}%` }} />
+      )}
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default async function AdminVideosPage() {
       <h1 className="text-xl font-semibold text-stone-900 mb-6">Videos</h1>
 
       <div className="bg-white rounded-2xl border border-stone-200 p-6 mb-8">
-        <h2 className="text-sm font-semibold text-stone-700 mb-4">Upload new video</h2>
+        <h2 className="text-sm font-semibold text-stone-700 mb-4">Add video from YouTube</h2>
         <UploadForm />
       </div>
 
