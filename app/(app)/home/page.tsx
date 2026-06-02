@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { currentRasaWeek } from "@/lib/bss";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import Greeting from "./Greeting";
 
@@ -35,6 +37,27 @@ export default async function HomePage() {
         .eq("user_id", user!.id)
         .maybeSingle(),
     ]);
+
+  // If cohort member hasn't completed the pre-survey, send them there first
+  if (membership?.cohort_id && user?.email) {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (serviceKey) {
+      const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+      const { data: survey } = await admin
+        .from("brain_health_surveys")
+        .select("id")
+        .eq("cohort_id", membership.cohort_id)
+        .eq("member_email", user.email.toLowerCase())
+        .eq("survey_type", "pre")
+        .maybeSingle();
+
+      if (!survey) {
+        redirect(`/survey/baseline?cohort=${membership.cohort_id}&type=pre`);
+      }
+    }
+  }
 
   // Resolve cohort day + today's message
   let cohortDay: number | null = null;
