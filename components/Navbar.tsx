@@ -52,20 +52,12 @@ export default function Navbar() {
               Go to practice
             </Link>
           ) : (
-            <>
-              <Link
-                href="/auth/login"
-                className="text-sm font-medium text-stone-600 hover:text-teal-700 transition-colors"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/onboarding"
-                className="ml-2 px-4 py-2 rounded-full bg-teal-700 text-white text-sm font-medium hover:bg-teal-800 transition-colors"
-              >
-                Try it free
-              </Link>
-            </>
+            <Link
+              href="/auth/login"
+              className="text-sm font-medium text-stone-600 hover:text-teal-700 transition-colors"
+            >
+              Sign in
+            </Link>
           )}
         </div>
 
@@ -107,22 +99,13 @@ export default function Navbar() {
               Go to practice
             </Link>
           ) : (
-            <>
-              <Link
-                href="/auth/login"
-                onClick={() => setOpen(false)}
-                className="text-sm font-medium text-stone-600"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/onboarding"
-                onClick={() => setOpen(false)}
-                className="px-4 py-2 rounded-full bg-teal-700 text-white text-sm font-medium text-center"
-              >
-                Try it free
-              </Link>
-            </>
+            <Link
+              href="/auth/login"
+              onClick={() => setOpen(false)}
+              className="text-sm font-medium text-stone-600"
+            >
+              Sign in
+            </Link>
           )}
         </div>
       )}
