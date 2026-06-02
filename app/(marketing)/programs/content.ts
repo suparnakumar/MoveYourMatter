@@ -67,6 +67,6 @@ export const howItWorks = {
 export const cta = {
   heading: "The practice is open.",
   body: "No prior dance experience required. Only a willingness to slow down and show up — every day.",
-  label: "Begin the Practice",
+  label: "Join the waitlist",
   href: "/signup",
 };
