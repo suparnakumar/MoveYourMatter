@@ -183,9 +183,11 @@ function DomainBar({
 export default function SurveyClient({
   cohortId,
   surveyType,
+  returnTo,
 }: {
   cohortId: string;
   surveyType: "pre" | "post";
+  returnTo?: string;
 }) {
   const [section, setSection] = useState<Section>("intro");
   const [scienceOpen, setScienceOpen] = useState(false);
@@ -642,18 +644,29 @@ export default function SurveyClient({
           )}
 
           {/* Account CTA */}
-          <a
-            href="/auth/login"
-            className="block w-full py-4 rounded-2xl bg-teal-700 text-white text-center font-semibold text-base hover:bg-teal-800 transition-colors"
-          >
-            Sign in to your account
-          </a>
-          <a
-            href="/auth/signup"
-            className="block text-center text-teal-700 text-sm font-medium mt-4 hover:underline"
-          >
-            New here? Create a free account
-          </a>
+          {returnTo ? (
+            <a
+              href={returnTo}
+              className="block w-full py-4 rounded-2xl bg-teal-700 text-white text-center font-semibold text-base hover:bg-teal-800 transition-colors"
+            >
+              Go to your home page →
+            </a>
+          ) : (
+            <>
+              <a
+                href="/auth/login"
+                className="block w-full py-4 rounded-2xl bg-teal-700 text-white text-center font-semibold text-base hover:bg-teal-800 transition-colors"
+              >
+                Sign in to your account
+              </a>
+              <a
+                href="/auth/signup"
+                className="block text-center text-teal-700 text-sm font-medium mt-4 hover:underline"
+              >
+                New here? Create a free account
+              </a>
+            </>
+          )}
         </div>
       </div>
     );

@@ -30,7 +30,7 @@ export default async function VideosPage() {
   const cohort = (membership as any).cohorts as { name: string; start_date: string };
   const startMs = new Date(cohort.start_date + "T00:00:00").getTime();
   const todayMs = new Date(today + "T00:00:00").getTime();
-  const currentDay = Math.floor((todayMs - startMs) / 86400000) + 1;
+  const currentDay = Math.min(Math.floor((todayMs - startMs) / 86400000) + 1, 28);
 
   // Only show videos for days already released
   const { data: entries } = await supabase
@@ -54,7 +54,7 @@ export default async function VideosPage() {
 
       {!entries?.length ? (
         <div className="text-center py-16">
-          <p className="text-stone-400 text-sm">No videos released yet — check back on Day 1.</p>
+          <p className="text-stone-400 text-sm">No videos scheduled yet — check back soon.</p>
         </div>
       ) : (
         <VideoLibrary entries={entries} />
