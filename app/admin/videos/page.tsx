@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import UploadForm from "./UploadForm";
+import DeleteVideoButton from "./DeleteVideoButton";
 
 function formatDuration(seconds: number) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -28,7 +29,7 @@ export default async function AdminVideosPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-stone-100 bg-stone-50">
               <tr>
-                {["Title", "Type", "Rasa", "Duration", "Status"].map((h) => (
+                {["Title", "Type", "Rasa", "Duration", "Status", ""].map((h) => (
                   <th key={h} className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -48,6 +49,9 @@ export default async function AdminVideosPage() {
                     }`}>
                       {v.active ? "Active" : "Inactive"}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <DeleteVideoButton videoId={v.id} title={v.title} />
                   </td>
                 </tr>
               ))}
