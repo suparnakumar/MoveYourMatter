@@ -17,12 +17,13 @@ const tabs = [
     ),
   },
   {
-    href: "/practice",
-    label: "Practice",
+    href: "/videos",
+    label: "Videos",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="9"/>
-        <path d="M10 8l6 4-6 4V8z" fill="currentColor" stroke="none"/>
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+        <path d="M10 10l5 3-5 3V10z" fill="currentColor" stroke="none"/>
       </svg>
     ),
   },
