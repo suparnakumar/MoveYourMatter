@@ -6,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddMemberForm from "./AddMemberForm";
 import EditWhatsappLink from "./EditWhatsappLink";
+import EditZoomUrl from "./EditZoomUrl";
 import RemoveMemberButton from "./RemoveMemberButton";
 import NotifyMembersButton from "./NotifyMembersButton";
 import EditStartDate from "./EditStartDate";
@@ -16,7 +17,7 @@ export default async function AdminCohortPage({ params }: { params: Promise<{ id
 
   const { data: cohort } = await supabase
     .from("cohorts")
-    .select("id, name, start_date, whatsapp_link, active")
+    .select("id, name, start_date, whatsapp_link, zoom_url, active")
     .eq("id", id)
     .single();
 
@@ -87,6 +88,7 @@ export default async function AdminCohortPage({ params }: { params: Promise<{ id
           <p className="font-medium text-stone-800">{members.length}</p>
         </div>
         <EditWhatsappLink cohortId={id} current={cohort.whatsapp_link} />
+        <EditZoomUrl cohortId={id} current={(cohort as any).zoom_url ?? null} />
       </div>
 
       {/* Add member */}

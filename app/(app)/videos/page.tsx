@@ -35,10 +35,11 @@ export default async function VideosPage() {
   // Only show videos for days already released
   const { data: entries } = await supabase
     .from("cohort_schedule")
-    .select("day_number, message, videos(id, title, url, duration_seconds)")
+    .select("day_number, message, position, videos(id, title, url, duration_seconds)")
     .eq("cohort_id", membership.cohort_id)
     .lte("day_number", Math.max(currentDay, 1))
-    .order("day_number", { ascending: false });
+    .order("day_number", { ascending: false })
+    .order("position", { ascending: true });
 
   return (
     <div className="flex-1 px-5 py-7 md:px-10 md:py-10 max-w-2xl mx-auto w-full">
