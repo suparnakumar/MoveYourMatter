@@ -20,10 +20,6 @@ export const TOTAL_SESSION_SECONDS = SESSION_PHASES.reduce((s, p) => s + p.durat
 export { SESSION_PHASES };
 
 type SaveParams = {
-  pre: CheckIn;
-  post: CheckIn;
-  bss: number;
-  deltas: CheckIn;
   sessionPlanId: string | null;
 };
 
@@ -81,7 +77,7 @@ export function usePracticeSession({
     setSessionDone(true);
   }
 
-  async function save({ pre, post, bss, deltas, sessionPlanId }: SaveParams) {
+  async function save({ sessionPlanId }: SaveParams) {
     setSaving(true);
     const today = new Date().toISOString().split("T")[0];
 
@@ -90,16 +86,6 @@ export function usePracticeSession({
       session_date: today,
       session_plan_id: sessionPlanId,
       rasa_slug: rasa.slug,
-      pre_focus: pre.focus,
-      pre_energy: pre.energy,
-      pre_calm: pre.calm,
-      post_focus: post.focus,
-      post_energy: post.energy,
-      post_calm: post.calm,
-      delta_focus: deltas.focus,
-      delta_energy: deltas.energy,
-      delta_calm: deltas.calm,
-      brain_shift_score: bss,
       duration_seconds: secondsElapsed,
       completed: true,
     });

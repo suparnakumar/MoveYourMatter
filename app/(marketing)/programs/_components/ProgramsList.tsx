@@ -18,7 +18,7 @@ export default function ProgramsList() {
                 <p className="text-stone-400 italic text-sm mt-1">{subtitle}</p>
               </div>
               <Link href="/signup" className="px-6 py-3 rounded-full bg-teal-700 text-white font-semibold hover:bg-teal-800 transition-colors whitespace-nowrap">
-                Get Access
+                Join the waitlist
               </Link>
             </div>
             <p className="text-stone-600 leading-relaxed">{description}</p>
