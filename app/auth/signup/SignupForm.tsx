@@ -35,7 +35,14 @@ export default function SignupForm() {
     });
 
     if (error) {
-      setError(error.message);
+      const msg = error.message.toLowerCase();
+      if (msg.includes("already registered") || msg.includes("already exists") || msg.includes("user already")) {
+        setError("An account with this email already exists. Try signing in, or use 'Forgot password?' to reset your password.");
+      } else if (msg.includes("password") || error.code === "weak_password") {
+        setError("Password not strong enough. Try at least 8 characters with a mix of uppercase, lowercase, and numbers.");
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
       return;
     }
@@ -60,7 +67,7 @@ export default function SignupForm() {
             We sent a confirmation link to <span className="font-medium text-stone-700">{email}</span>.
             Click it to activate your account and you&apos;re in.
           </p>
-          <a href="/auth/login" className="inline-block mt-8 text-teal-700 text-sm font-medium hover:underline">
+          <a href={`/auth/login?next=${encodeURIComponent(next)}`} className="inline-block mt-8 text-teal-700 text-sm font-medium hover:underline">
             Back to sign in
           </a>
         </div>
@@ -109,6 +116,7 @@ export default function SignupForm() {
             minLength={8}
             className="w-full px-4 py-3 rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
           />
+          <p className="text-xs text-stone-400 px-1">At least 8 characters, mix of uppercase, lowercase and numbers</p>
           <button
             type="submit"
             disabled={loading}

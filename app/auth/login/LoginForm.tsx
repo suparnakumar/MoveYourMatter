@@ -25,7 +25,14 @@ export default function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError(error.message);
+      const msg = error.message.toLowerCase();
+      if (msg.includes("email not confirmed")) {
+        setError("Please confirm your email first — check your inbox for the confirmation link we sent when you signed up.");
+      } else if (msg.includes("invalid login credentials") || msg.includes("invalid credentials")) {
+        setError("Email or password is incorrect. Use 'Forgot password?' if you've lost access.");
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
     } else {
       router.push(next);
