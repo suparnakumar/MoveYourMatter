@@ -8,6 +8,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (!user) redirect("/auth/login");
 
+  // Track last seen — best-effort
+  try {
+    await supabase
+      .from("cohort_members")
+      .update({ last_seen_at: new Date().toISOString() })
+      .eq("user_id", user.id);
+  } catch { /* non-blocking */ }
+
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col">
       {/* Top nav — desktop only */}
