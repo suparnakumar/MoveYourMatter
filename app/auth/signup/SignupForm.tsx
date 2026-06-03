@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") ?? "/home";
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +26,7 @@ export default function SignupForm() {
       email,
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
         data: {
           full_name: fullName,
           onboarding_complete: true,
@@ -37,9 +40,9 @@ export default function SignupForm() {
       return;
     }
 
-    // If session is returned immediately (email confirmation disabled), go home
+    // If session is returned immediately (email confirmation disabled), go to next
     if (data.session) {
-      router.push("/home");
+      router.push(next);
     } else {
       // Email confirmation required — show message
       setEmailSent(true);

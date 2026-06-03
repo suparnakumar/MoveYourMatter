@@ -132,7 +132,7 @@ export default function LoginForm() {
 
         <p className="text-center text-stone-400 text-sm mt-8">
           New here?{" "}
-          <a href="/auth/signup" className="text-teal-700 font-medium hover:underline">
+          <a href={`/auth/signup?next=${encodeURIComponent(next)}`} className="text-teal-700 font-medium hover:underline">
             Create an account
           </a>
         </p>
